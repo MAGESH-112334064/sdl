@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Canteen Connect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9f9f9;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 360px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border-top: 5px solid gold;
+    }
+
+    h2 {
+      text-align: center;
+      color: #b8860b;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: gold;
+      outline: none;
+      box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+
+    .eye {
+      position: absolute;
+      right: 12px;
+      top: 18px;
+      cursor: pointer;
+      font-size: 14px;
+      color: gray;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(45deg, gold, #ffd700);
+      color: black;
+      border: none;
+      margin-top: 12px;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .success {
+      color: green;
+      text-align: center;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>📝 Register</h2>
+
+  <form id="registerForm">
+
+    <input type="text" id="name" placeholder="Full Name" maxlength="40">
+    <div class="error" id="nameError"></div>
+
+    <input type="email" id="email" placeholder="Email" maxlength="40">
+    <div class="error" id="emailError"></div>
+
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Password" maxlength="40">
+      <span class="eye" onclick="togglePassword('password')">👁</span>
+    </div>
+    <div class="error" id="passError"></div>
+
+    <div class="input-group">
+      <input type="password" id="confirm" placeholder="Confirm Password" maxlength="40">
+      <span class="eye" onclick="togglePassword('confirm')">👁</span>
+    </div>
+    <div class="error" id="confError"></div>
+
+    <button class="btn">Register</button>
+
+    <div class="success" id="success"></div>
+
+  </form>
+
+  <div class="link">
+    Already have an account? <a href="login.html">Login</a>
+  </div>
+</div>
+
+<script>
+
+function togglePassword(id) {
+  let input = document.getElementById(id);
+  input.type = input.type === "password" ? "text" : "password";
+}
+
+function isValidEmail(email) {
+  return /^[^ ]+@[^ ]+\.[a-z]{2,3}$/.test(email);
+}
+
+document.getElementById("name").addEventListener("input", function() {
+  let val = this.value;
+
+  if (val.startsWith(" ")) {
+    this.value = val.trimStart();
+    document.getElementById("nameError").innerText = "No space at start";
+    this.style.border = "1px solid red";
+    return;
+  }
+
+  if (!/^[A-Za-z ]*$/.test(val)) {
+    this.value = val.replace(/[^A-Za-z ]/g, "");
+    document.getElementById("nameError").innerText = "Only letters allowed";
+    this.style.border = "1px solid red";
+    return;
+  }
+
+  if (val.trim().length < 3) {
+    document.getElementById("nameError").innerText = "Min 3 characters";
+    this.style.border = "1px solid red";
+  } 
+  else {
+    document.getElementById("nameError").innerText = "";
+    this.style.border = "1px solid green";
+  }
+});
+
+document.getElementById("email").addEventListener("input", function() {
+  if (!isValidEmail(this.value)) {
+    this.style.border = "1px solid red";
+    document.getElementById("emailError").innerText = "Invalid email";
+  } else {
+    this.style.border = "1px solid green";
+    document.getElementById("emailError").innerText = "";
+  }
+});
+
+document.getElementById("password").addEventListener("input", function() {
+  if (this.value.length < 6) {
+    this.style.border = "1px solid red";
+    document.getElementById("passError").innerText = "Min 6 characters";
+  } else {
+    this.style.border = "1px solid green";
+    document.getElementById("passError").innerText = "";
+  }
+});
+
+document.getElementById("confirm").addEventListener("input", function() {
+  let pass = document.getElementById("password").value;
+  if (this.value !== pass) {
+    this.style.border = "1px solid red";
+    document.getElementById("confError").innerText = "Passwords not matching";
+  } else {
+    this.style.border = "1px solid green";
+    document.getElementById("confError").innerText = "";
+  }
+});
+
+document.getElementById("registerForm").addEventListener("submit", function(e){
+  e.preventDefault();
+
+  let name = document.getElementById("name").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let password = document.getElementById("password").value;
+
+  if (!/^[A-Za-z ]+$/.test(name) || name.startsWith(" ")) {
+    document.getElementById("nameError").innerText = "Invalid name";
+    return;
+  }
+
+  if (!isValidEmail(email) || password.length < 6) {
+    return;
+  }
+
+  let user = { name, email, password };
+  localStorage.setItem("user", JSON.stringify(user));
+
+  document.getElementById("success").innerText = "Registered Successfully 🎉";
+
+  setTimeout(() => {
+    window.location.href = "login.html";
+  }, 1500);
+});
+
+</script>
+
+</body>
+</html>

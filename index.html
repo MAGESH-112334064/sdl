@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canteen Connect</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+  const SHEETS_ENDPOINT = "https://script.google.com/macros/s/AKfycbycmjip6cPcNTUK1o6hgrJMzsoJfLvf90AGjbxc1F_ABIOvVwy84WmPDxfxAJ2yLnTH/exec";
+</script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-image: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=90');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 5, 0, 0.65);
+  z-index: 0;
+  pointer-events: none;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: rgba(0,0,0,0.6);
+  border-bottom: 2px solid gold;
+  backdrop-filter: blur(8px);
+}
+.logo { font-size: 22px; font-weight: bold; color: gold; letter-spacing: 1px; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.user-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(255,215,0,0.15);
+  border: 2px solid gold;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+.user-icon:hover { background: rgba(255,215,0,0.3); transform: scale(1.1); }
+.user-icon svg { width: 22px; height: 22px; fill: gold; }
+.cart-btn {
+  background: rgba(255,215,0,0.15);
+  border: 1.5px solid gold;
+  color: gold;
+  padding: 8px 18px; border-radius: 8px;
+  cursor: pointer; font-weight: bold;
+  font-size: 14px;
+}
+.cart-btn span { background: gold; color: #1a0a00; border-radius: 50%; padding: 1px 6px; font-size: 12px; margin-left: 4px; }
+
+/* HERO */
+.hero {
+  padding: 60px 40px 50px;
+  text-align: center;
+}
+.hero h2 {
+  color: #fff; font-size: 32px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+  margin-bottom: 6px;
+}
+.hero p { color: rgba(255,255,255,0.7); font-size: 15px; margin-bottom: 22px; }
+.search-wrap { display: flex; justify-content: center; }
+.search-wrap input {
+  padding: 12px 16px; width: 280px;
+  border-radius: 10px; border: 1.5px solid rgba(255,215,0,0.4);
+  background: rgba(255,255,255,0.12); color: #fff;
+  backdrop-filter: blur(8px); font-size: 14px; outline: none;
+}
+.search-wrap input::placeholder { color: rgba(255,255,255,0.55); }
+.search-wrap input:focus { border-color: gold; }
+
+/* PROMO CARDS */
+.cards {
+  display: flex; justify-content: center;
+  gap: 24px; margin: 10px 30px 30px;
+}
+.card {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px; border-radius: 18px; width: 230px;
+  text-align: center;
+  border: 1px solid rgba(255,215,0,0.3);
+  color: #fff; transition: transform 0.3s;
+}
+.card:hover { transform: translateY(-5px); }
+.card h3 { color: gold; margin-bottom: 6px; }
+.card p { font-size: 13px; color: rgba(255,255,255,0.75); margin-bottom: 10px; }
+.card img { width: 110px; border-radius: 10px; border: 2px solid gold; }
+
+/* SECTION */
+.section { padding: 10px 30px 60px; }
+.section h2 { color: gold; font-size: 22px; margin-bottom: 28px; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+
+/* FOOD CARDS */
+.food-list {
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 28px;
+}
+.food-item {
+  width: 175px; border-radius: 22px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  position: relative; background: #1a0e00;
+  border: 1px solid rgba(255,215,0,0.3);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  display: flex; flex-direction: column;
+}
+.food-item:hover { transform: translateY(-8px); box-shadow: 0 20px 48px rgba(0,0,0,0.65); border-color: gold; }
+
+.food-item-img-wrap { width: 100%; height: 130px; overflow: hidden; position: relative; }
+.food-item-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+.food-item:hover .food-item-img-wrap img { transform: scale(1.1); }
+.food-item-img-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 50%; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5));
+}
+
+.food-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(255,215,0,0.92); color: #3a1a00;
+  font-size: 11px; font-weight: bold;
+  padding: 3px 9px; border-radius: 20px; z-index: 2;
+}
+
+.food-info {
+  padding: 10px 10px 6px;
+  background: rgba(0,0,0,0.55);
+  border-top: 1.5px solid rgba(255,215,0,0.3);
+  text-align: center;
+}
+.food-name { color: #ffe88a; font-weight: bold; font-size: 14px; margin-bottom: 3px; }
+.food-price { color: gold; font-size: 13px; margin-bottom: 8px; }
+
+/* QUANTITY CONTROL */
+.qty-control {
+  display: flex; align-items: center;
+  justify-content: center; gap: 8px; margin-bottom: 8px;
+}
+.qty-btn {
+  background: gold; color: #1a0a00;
+  border: none; width: 26px; height: 26px;
+  border-radius: 50%; font-size: 16px; font-weight: bold;
+  cursor: pointer; line-height: 1; transition: background 0.2s;
+}
+.qty-btn:hover { background: #ffe066; }
+.qty-num { color: #fff; font-weight: bold; font-size: 15px; min-width: 20px; text-align: center; }
+
+/* ORDER BTN */
+.order-btn {
+  width: 100%; padding: 9px 0;
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #1a0a00; border: none;
+  font-weight: bold; font-size: 13px;
+  cursor: pointer; transition: opacity 0.2s;
+}
+.order-btn:hover { opacity: 0.88; }
+
+/* ===== CART SIDEBAR ===== */
+.cart-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 100; display: none;
+}
+.cart-overlay.open { display: block; }
+
+.cart-panel {
+  position: fixed; top: 0; right: -420px; width: 380px;
+  height: 100vh; background: #1a0e00;
+  border-left: 2px solid gold;
+  z-index: 101; transition: right 0.35s ease;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.cart-panel.open { right: 0; }
+.cart-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255,215,0,0.3);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cart-header h3 { color: gold; font-size: 18px; }
+.close-btn { background: none; border: none; color: gold; font-size: 22px; cursor: pointer; }
+.cart-items { flex: 1; overflow-y: auto; padding: 16px 24px; }
+.cart-empty { color: rgba(255,255,255,0.45); text-align: center; margin-top: 60px; font-size: 15px; }
+
+.cart-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid rgba(255,215,0,0.12);
+}
+.cart-row-name { color: #ffe88a; font-size: 14px; font-weight: 600; }
+.cart-row-sub { color: rgba(255,255,255,0.5); font-size: 12px; }
+.cart-row-price { color: gold; font-weight: bold; font-size: 14px; white-space: nowrap; }
+.remove-btn { background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 16px; margin-left: 10px; }
+
+.cart-footer {
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255,215,0,0.3);
+  background: rgba(0,0,0,0.4);
+}
+.total-row { display: flex; justify-content: space-between; margin-bottom: 14px; }
+.total-label { color: rgba(255,255,255,0.7); font-size: 15px; }
+.total-amt { color: gold; font-weight: bold; font-size: 20px; }
+.pay-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #1a0a00; border: none; border-radius: 10px;
+  font-size: 16px; font-weight: bold; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.pay-btn:hover { opacity: 0.88; }
+.pay-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== PAYMENT MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200; display: none;
+  justify-content: center; align-items: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #1a0e00;
+  border: 2px solid gold;
+  border-radius: 20px;
+  padding: 32px 36px;
+  width: 360px;
+  text-align: center;
+  position: relative;
+}
+.modal h3 { color: gold; font-size: 20px; margin-bottom: 8px; }
+.modal p { color: rgba(255,255,255,0.65); font-size: 14px; margin-bottom: 20px; }
+.modal-total { color: #fff; font-size: 28px; font-weight: bold; margin-bottom: 24px; }
+.modal-total span { color: gold; }
+
+.payment-methods { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+.pm-btn {
+  flex: 1; padding: 10px 6px;
+  background: rgba(255,215,0,0.1);
+  border: 1.5px solid rgba(255,215,0,0.35);
+  border-radius: 10px; color: #ffe88a;
+  font-size: 13px; font-weight: bold; cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.pm-btn.active, .pm-btn:hover { background: rgba(255,215,0,0.25); border-color: gold; }
+
+.confirm-pay-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #1a0a00; border: none; border-radius: 10px;
+  font-size: 16px; font-weight: bold; cursor: pointer;
+  margin-bottom: 10px;
+}
+.modal-close {
+  background: none; border: none;
+  color: rgba(255,255,255,0.4); cursor: pointer;
+  font-size: 13px; text-decoration: underline;
+}
+
+/* ===== SUCCESS / QR MODAL ===== */
+.qr-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.82);
+  z-index: 300; display: none;
+  justify-content: center; align-items: center;
+}
+.qr-modal-overlay.open { display: flex; }
+.qr-modal {
+  background: #1a0e00;
+  border: 2px solid gold;
+  border-radius: 22px;
+  padding: 36px 40px;
+  width: 380px;
+  text-align: center;
+}
+.success-icon { font-size: 52px; margin-bottom: 10px; }
+.qr-modal h3 { color: gold; font-size: 22px; margin-bottom: 6px; }
+.qr-modal p { color: rgba(255,255,255,0.65); font-size: 14px; margin-bottom: 20px; }
+.order-id { color: #ffe88a; font-size: 13px; margin-bottom: 18px; letter-spacing: 1px; }
+#qrcode { display: flex; justify-content: center; margin-bottom: 20px; }
+#qrcode canvas, #qrcode img { border: 6px solid gold; border-radius: 12px; }
+.qr-note { color: rgba(255,255,255,0.45); font-size: 12px; margin-bottom: 20px; }
+.done-btn {
+  width: 100%; padding: 12px;
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #1a0a00; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: bold; cursor: pointer;
+}
+
+.footer {
+  text-align: center; padding: 18px;
+  color: rgba(255,255,255,0.3); font-size: 13px;
+  border-top: 1px solid rgba(255,215,0,0.12);
+  background: rgba(0,0,0,0.3);
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">🍽️ Canteen</div>
+  <div class="nav-right">
+    <button class="cart-btn" onclick="openCart()">🛒 Cart <span id="cart-count">0</span></button>
+    <span id="user-greeting" style="color:gold;font-size:14px;font-weight:bold;display:none;"></span>
+    <a href="login.html" id="login-btn" class="user-icon" title="Login">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+      </svg>
+    </a>
+    <button id="logout-btn" onclick="logoutUser()" style="display:none;background:rgba(255,50,50,0.15);border:1.5px solid #ff6b6b;color:#ff6b6b;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:13px;">🚪 Logout</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h2>Order food from your canteen 🍔</h2>
+  <p>Fresh, fast &amp; delicious — served with love</p>
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="🔍 Search food..." oninput="filterMenu(this.value)">
+  </div>
+</div>
+
+
+
+<!-- FOOD MENU -->
+<div class="section">
+  <h2>Order our best food options</h2>
+  <div class="food-list" id="food-list"></div>
+</div>
+
+<div class="footer">© 2025 Canteen Connect · All rights reserved</div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+<div class="cart-panel" id="cart-panel">
+  <div class="cart-header">
+    <h3>🛒 Your Order</h3>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty">Your cart is empty</div>
+  </div>
+  <div class="cart-footer">
+    <div class="total-row">
+      <span class="total-label">Total Amount</span>
+      <span class="total-amt" id="cart-total">₹0</span>
+    </div>
+    <button class="pay-btn" id="pay-btn" onclick="openPayment()" disabled>Proceed to Pay</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <h3>💳 Payment</h3>
+    <p>Choose your payment method</p>
+    <div class="modal-total">Total: <span id="pay-total">₹0</span></div>
+    <div class="payment-methods">
+      <button class="pm-btn active" onclick="selectPM(this)">📱 UPI</button>
+      <button class="pm-btn" onclick="selectPM(this)">💳 Card</button>
+      <button class="pm-btn" onclick="selectPM(this)">💵 Cash</button>
+    </div>
+    <button class="confirm-pay-btn" onclick="confirmPayment()">✅ Confirm &amp; Pay</button>
+    <button class="modal-close" onclick="closePayment()">Cancel</button>
+  </div>
+</div>
+
+<!-- QR SUCCESS MODAL -->
+<div class="qr-modal-overlay" id="qr-modal">
+  <div class="qr-modal">
+    <div class="success-icon">🎉</div>
+    <h3>Payment Successful!</h3>
+    <p>Show this QR code at the counter to collect your order</p>
+    <div class="order-id" id="order-id-text"></div>
+    <div id="qrcode"></div>
+    <div class="qr-note">📸 Screenshot this QR code before closing</div>
+    <button class="done-btn" onclick="allDone()">✅ Done</button>
+  </div>
+</div>
+
+<script>
+const menu = [
+  { name: "Dosa",        price: 30, badge: "⭐ Popular", img: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&q=80" },
+  { name: "Ice Cream",   price: 40, badge: "🍦 Cool",    img: "https://images.unsplash.com/photo-1576506295286-5cda18df43e7?w=400&q=80" },
+  { name: "Samosa",      price: 15, badge: "🔥 Hot",     img: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&q=80" },
+  { name: "Tea",         price: 10, badge: "☕ Fresh",   img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80" },
+  { name: "Coffee",      price: 20, badge: "☕ Strong",  img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80" },
+  { name: "Boost",       price: 25, badge: "💪 Energy",  img: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80" },
+  { name: "Coca-Cola",   price: 20, badge: "🥤 Fizzy",   img: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?w=400&q=80" },
+  { name: "Milkshake",   price: 30, badge: "🥛 Creamy",  img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=80" },
+  { name: "Mango Juice", price: 25, badge: "🥭 Fresh",   img: "https://images.unsplash.com/photo-1546173159-315724a31696?w=400&q=80" }
+];
+
+let quantities = menu.map(() => 0);
+let cart = [];
+
+function filterMenu(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) { renderMenu(menu); return; }
+  const filtered = menu.filter(item => item.name.toLowerCase().includes(q));
+  renderMenu(filtered);
+}
+
+function renderMenu(items) {
+  items = items || menu;
+  const list = document.getElementById('food-list');
+  if (items.length === 0) {
+    list.innerHTML = `<div style="width:100%;text-align:center;padding:40px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">🍽️</div>
+      <div style="color:gold;font-size:20px;font-weight:bold;margin-bottom:6px;">No results found</div>
+      <div style="color:rgba(255,255,255,0.5);font-size:14px;">Try searching something else</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = items.map((item) => {
+    const i = menu.indexOf(item);
+    return `
+    <div class="food-item">
+      <span class="food-badge">${item.badge}</span>
+      <div class="food-item-img-wrap">
+        <img src="${item.img}" alt="${item.name}">
+      </div>
+      <div class="food-info">
+        <div class="food-name">${item.name}</div>
+        <div class="food-price">₹${item.price}</div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty(${i}, -1)">−</button>
+          <span class="qty-num" id="qty-${i}">0</span>
+          <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
+        </div>
+      </div>
+      <button class="order-btn" data-idx="${i}" onclick="addToCart(${i})">🛒 Add to Order</button>
+    </div>
+  `; }).join('');
+}
+
+function changeQty(i, delta) {
+  quantities[i] = Math.max(0, quantities[i] + delta);
+  document.getElementById('qty-' + i).textContent = quantities[i];
+}
+
+function addToCart(i) {
+  const qty = quantities[i];
+  if (qty === 0) { alert('Please select quantity first!'); return; }
+  const item = menu[i];
+  const existing = cart.find(c => c.name === item.name);
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    cart.push({ name: item.name, price: item.price, qty });
+  }
+  quantities[i] = 0;
+  document.getElementById('qty-' + i).textContent = '0';
+  updateCartUI();
+
+  // FIX 3: find the exact button by data-idx, works correctly even during search/filter
+  const btn = document.querySelector(`.order-btn[data-idx="${i}"]`);
+  if (btn) {
+    btn.textContent = '\u2705 Added!';
+    setTimeout(() => { btn.textContent = '\uD83D\uDED2 Add to Order'; }, 1200);
+  }
+}
+
+function updateCartUI() {
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const count = cart.reduce((s, c) => s + c.qty, 0);
+  document.getElementById('cart-count').textContent = count;
+  document.getElementById('cart-total').textContent = '₹' + total;
+  document.getElementById('pay-total').textContent  = '₹' + total;
+  document.getElementById('pay-btn').disabled = cart.length === 0;
+
+  const container = document.getElementById('cart-items');
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+    return;
+  }
+  container.innerHTML = cart.map((c, idx) => `
+    <div class="cart-row">
+      <div>
+        <div class="cart-row-name">${c.name}</div>
+        <div class="cart-row-sub">₹${c.price} × ${c.qty}</div>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <span class="cart-row-price">₹${c.price * c.qty}</span>
+        <button class="remove-btn" onclick="removeFromCart(${idx})">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  updateCartUI();
+}
+
+function openCart()  { document.getElementById('cart-overlay').classList.add('open'); document.getElementById('cart-panel').classList.add('open'); }
+function closeCart() { document.getElementById('cart-overlay').classList.remove('open'); document.getElementById('cart-panel').classList.remove('open'); }
+
+function openPayment()  { closeCart(); document.getElementById('payment-modal').classList.add('open'); }
+function closePayment() { document.getElementById('payment-modal').classList.remove('open'); }
+
+function selectPM(el) {
+  document.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function confirmPayment() {
+  if (cart.length === 0) {
+    alert('Your cart is empty. Add items before paying.');
+    return;
+  }
+
+  const confirmBtn = document.querySelector('.confirm-pay-btn');
+  const originalText = confirmBtn.textContent;
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = '⏳ Saving order...';
+
+  const orderId = 'CC-' + Math.random().toString(36).substring(2,8).toUpperCase();
+  const total   = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const items   = cart.map(c => ({ name: c.name, qty: c.qty, price: c.price }));
+  const paymentMethod = document.querySelector('.pm-btn.active')?.textContent.trim() || 'UPI';
+
+  const orderData = { orderId, total, items, paymentMethod, createdAt: new Date().toISOString() };
+
+  try {
+    await fetch(SHEETS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(orderData),
+      mode: "no-cors"
+    });
+    console.log("✅ Order sent to Google Sheets");
+    closePayment();
+    showOrderSuccess(orderId, items, total);
+  } catch (err) {
+    console.error('Order submission failed:', err);
+    alert('❌ Could not save order: ' + err.message);
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = originalText;
+  }
+}
+
+function showOrderSuccess(orderId, items, total) {
+  const itemList = items.map(i => `${i.name} x${i.qty}`).join(', ');
+  const qrData   = `${orderId}`;
+
+  document.getElementById('order-id-text').textContent = '🆔 Order ID: ' + orderId;
+  document.getElementById('qrcode').innerHTML = ''; 
+  new QRCode(document.getElementById('qrcode'), {
+    text: qrData,
+    width: 200,
+    height: 200,
+    colorDark: '#1a0e00',
+    colorLight: '#ffd700',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById('qr-modal').classList.add('open');
+}
+
+function allDone() {
+  cart = [];
+  quantities = menu.map(() => 0);
+  updateCartUI();
+  document.getElementById('qr-modal').classList.remove('open');
+}
+
+renderMenu();
+
+// ── Auth: check login state on page load ──────────────────────────────────
+(function checkAuth() {
+  const loggedIn = localStorage.getItem("loggedIn") === "true";
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  if (!loggedIn || !user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  // Show user greeting and logout button
+  const firstName = user.name ? user.name.split(" ")[0] : "User";
+  document.getElementById("user-greeting").textContent = "👋 " + firstName;
+  document.getElementById("user-greeting").style.display = "inline";
+  document.getElementById("login-btn").style.display = "none";
+  document.getElementById("logout-btn").style.display = "inline-block";
+})();
+
+function logoutUser() {
+  if (confirm("Are you sure you want to logout?")) {
+    localStorage.removeItem("loggedIn");
+    window.location.href = "login.html";
+  }
+}
+</script>
+</body>
+</html>
