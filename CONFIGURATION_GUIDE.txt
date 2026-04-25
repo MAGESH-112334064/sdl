@@ -1,0 +1,479 @@
+================================================================================
+CANTEEN CONNECT - FRONTEND, BACKEND & DATABASE CONFIGURATION GUIDE
+================================================================================
+
+Project: Canteen Connect - A full-stack web application for canteen/cafeteria ordering
+Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. FRONTEND CONFIGURATION
+2. BACKEND CONFIGURATION
+3. DATABASE CONFIGURATION
+4. ENVIRONMENT VARIABLES
+5. BUILD & DEPLOYMENT
+6. USEFUL COMMANDS
+
+================================================================================
+1. FRONTEND CONFIGURATION
+================================================================================
+
+WHAT IS IT?
+-----------
+The frontend is a React-based Single Page Application (SPA) built with modern web technologies.
+It's responsible for the user interface, form handling, and client-side logic.
+
+CONFIGURATION FILES:
+--------------------
+
+1) vite.config.ts
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\vite.config.ts
+   Purpose: Vite build tool configuration
+   Key Settings:
+   - Development server runs on port 8080
+   - Path alias: "@" maps to ./src folder for clean imports
+   - Hot Module Replacement (HMR) is enabled for development
+   - React SWC compiler for faster builds
+   - Lovable component tagging in development mode
+
+2) tsconfig.json
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\tsconfig.json
+   Purpose: TypeScript compiler configuration
+   Key Settings:
+   - Base URL set to project root
+   - Path mapping: "@/*" → "./src/*" (allows @/components import)
+   - Loose type checking for flexibility
+   - Support for JavaScript files
+
+3) tailwind.config.ts
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\tailwind.config.ts
+   Purpose: Tailwind CSS styling configuration
+   Key Function: Defines custom colors, components, and utility classes
+
+4) postcss.config.js
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\postcss.config.js
+   Purpose: CSS post-processing configuration for Tailwind
+
+5) package.json
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\package.json
+   Purpose: Project metadata and dependency management
+   Package Manager: Bun
+   Key Dependencies:
+   - react@18.3.1
+   - react-dom@18.3.1
+   - react-router-dom@6.30.1 (routing)
+   - react-hook-form@7.61.1 (form management)
+   - @tanstack/react-query@5.83.0 (data fetching)
+   - @supabase/supabase-js@2.95.3 (backend client)
+   - tailwindcss@3.4.17 (CSS framework)
+   - framer-motion@12.34.0 (animations)
+   - recharts@2.15.4 (charts)
+   - sonner@1.7.4 (notifications)
+   - zod@3.25.76 (validation)
+
+FRONTEND ENTRY POINTS:
+---------------------
+- Main App: src/App.tsx
+- React DOM: src/main.tsx
+- Styling: src/App.css, src/index.css
+
+FRONTEND STRUCTURE:
+------------------
+src/
+├── pages/                 → Full page components (Auth, Menu, Cart, etc.)
+├── components/            → Reusable UI components
+│   ├── auth/             → Authentication guards (ProtectedRoute, AdminRoute)
+│   ├── layout/           → Layout wrapper components
+│   ├── shared/           → Business logic components (ProductCard, etc.)
+│   └── ui/               → Shadcn/UI library components (30+ pre-built)
+├── contexts/             → React Context for global state (AuthContext)
+├── hooks/                → Custom React hooks (useCart, useAuth, etc.)
+├── integrations/         → Third-party integrations
+│   ├── supabase/        → Supabase client setup
+│   └── lovable/         → Lovable AI integration
+└── lib/                  → Utility functions
+
+AVAILABLE ROUTES:
+-----------------
+- /                      → Home/Index page
+- /auth                  → Login/Registration
+- /auth/callback         → OAuth callback handler
+- /menu                  → Browse all menu items
+- /item/:id             → Individual item details
+- /cart                 → Shopping cart
+- /checkout             → Payment & order placement
+- /order/:id            → Order tracking
+- /orders               → User order history
+- /profile              → User profile management
+- /admin/*              → Admin dashboard (protected route)
+
+================================================================================
+2. BACKEND CONFIGURATION
+================================================================================
+
+WHAT IS IT?
+-----------
+The backend is Supabase - a BaaS (Backend-as-a-Service) platform built on PostgreSQL.
+It handles authentication, data storage, and API operations without needing a separate server.
+
+BACKEND LOCATION:
+-----------------
+Supabase Project ID: amfrvvtfvxgsbfkntict
+
+CONFIGURATION FILES:
+--------------------
+
+1) supabase/config.toml
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\supabase\config.toml
+   Purpose: Local Supabase configuration
+   Project ID: amfrvvtfvxgsbfkntict
+   Content: Configuration for local development with Supabase CLI
+
+2) src/integrations/supabase/client.ts
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\src\integrations\supabase\client.ts
+   Purpose: Supabase client initialization
+   Key Configuration:
+   - Creates Supabase client using credentials from environment variables
+   - SUPABASE_URL: Base URL of your Supabase project
+   - SUPABASE_PUBLISHABLE_KEY: Public API key for client-side access
+   - Enables localStorage persistence for authentication
+   - Enables automatic token refresh
+
+3) src/integrations/supabase/types.ts
+   Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\src\integrations/supabase/types.ts
+   Purpose: TypeScript types auto-generated from database schema
+   Content: Automatically generated - do not edit manually
+   Usage: Provides type safety for database queries
+
+SUPABASE FEATURES USED:
+-----------------------
+✓ Authentication (Email/OAuth login)
+✓ PostgreSQL Database (data storage)
+✓ Row-Level Security (RLS) policies
+✓ Real-time subscriptions (live updates)
+✓ Storage buckets (file uploads)
+
+KEY SUPABASE TABLES:
+--------------------
+- profiles: User profile information
+- products: Menu items/products
+- categories: Product categories
+- orders: Customer orders
+- order_items: Individual items in orders
+- favorites: Saved/favorited items
+
+AUTHENTICATION FLOW:
+--------------------
+1. User visits /auth page
+2. Frontend calls Supabase auth API
+3. Supabase handles login/signup
+4. Session stored in localStorage
+5. AuthContext manages user state
+6. Protected routes check session
+
+================================================================================
+3. DATABASE CONFIGURATION
+================================================================================
+
+WHAT IS IT?
+-----------
+PostgreSQL database hosted on Supabase. It stores all application data including
+users, products, orders, and settings.
+
+DATABASE MIGRATIONS:
+--------------------
+
+Location: c:\Users\mages\Music\Project\canteen-connect-maintanance\supabase\migrations\
+
+Migration File: 20260216043739_22f9abff-1387-4a9b-8fd1-8c1c5f66c01c.sql
+- Date: February 16, 2026
+- Contains: Initial database schema setup
+- Status: Applied to Supabase project
+
+DATABASE ACCESS:
+-----------------
+Access Method: Through Supabase Dashboard
+URL: https://supabase.com/dashboard
+Project ID: amfrvvtfvxgsbfkntict
+
+DATABASE SCHEMA:
+-----------------
+The database includes tables for:
+
+1) users (Managed by Supabase Auth)
+   - id, email, password (encrypted)
+   - created_at, updated_at
+
+2) profiles
+   - user_id (FK to users)
+   - name, email, phone
+   - role (user, admin)
+   - created_at, updated_at
+
+3) products
+   - id, name, description
+   - price, category_id
+   - image_url, is_veg
+   - created_at, updated_at
+
+4) categories
+   - id, name, description
+   - created_at
+
+5) orders
+   - id, user_id
+   - status (pending, preparing, ready, delivered)
+   - total_price, order_date
+   - created_at, updated_at
+
+6) order_items
+   - id, order_id, product_id
+   - quantity, price
+
+ROW LEVEL SECURITY (RLS):
+-------------------------
+- Only users can see their own orders
+- Admins can see all orders
+- Products are publicly readable
+- Modifications restricted by role
+
+================================================================================
+4. ENVIRONMENT VARIABLES
+================================================================================
+
+CONFIGURATION:
+---------------
+Environment variables are stored in .env file (not included in git)
+
+REQUIRED VARIABLES:
+-------------------
+VITE_SUPABASE_URL
+  - Your Supabase project URL
+  - Format: https://[project-id].supabase.co
+  - Used in: src/integrations/supabase/client.ts
+
+VITE_SUPABASE_PUBLISHABLE_KEY
+  - Your Supabase public API key
+  - Used for client-side authentication
+  - Found in Supabase project settings
+
+OPTIONAL VARIABLES:
+-------------------
+VITE_LOVABLE_API_KEY (for Lovable AI integration)
+VITE_API_BASE_URL (if using custom API)
+
+WHERE TO SET:
+-------------
+Create file: .env.local or .env
+Add variables in format: VITE_VARIABLE_NAME=value
+
+How to get Supabase credentials:
+1. Go to https://supabase.com/dashboard
+2. Select your project
+3. Go to Settings > API
+4. Copy URL and anon key (publishable key)
+5. Paste into .env file
+
+================================================================================
+5. BUILD & DEPLOYMENT
+================================================================================
+
+DEVELOPMENT MODE:
+------------------
+Command: npm run dev (or bun run dev)
+- Starts Vite dev server on http://localhost:8080
+- Hot Module Replacement (HMR) enabled
+- Instant file changes reflection
+
+BUILD FOR PRODUCTION:
+---------------------
+Command: npm run build (or bun run build)
+- Creates optimized production build
+- Output: dist/ folder
+- Minifies JavaScript and CSS
+- Tree-shaking for smaller bundle
+
+PREVIEW PRODUCTION BUILD:
+-------------------------
+Command: npm run preview
+- Serves the production build locally
+- Useful for testing before deployment
+
+DEVELOPMENT BUILD:
+------------------
+Command: npm run build:dev
+- Creates development build with source maps
+- Useful for debugging in production-like environment
+
+TESTING:
+--------
+Command: npm run test
+- Runs test suite once
+- Framework: Vitest
+
+Watch Mode Testing:
+Command: npm run test:watch
+- Continuously runs tests on file changes
+
+LINTING:
+--------
+Command: npm run lint
+- Checks code quality with ESLint
+- Helps maintain code standards
+
+================================================================================
+6. USEFUL COMMANDS
+================================================================================
+
+PROJECT SETUP:
+--------------
+npm install (or bun install)
+  - Install all dependencies
+
+bun --version
+  - Check Bun package manager version
+
+START DEVELOPMENT:
+------------------
+npm run dev
+  - Start development server (port 8080)
+
+BUILD & DEPLOY:
+---------------
+npm run build
+  - Create production-ready build
+
+npm run preview
+  - Test production build locally
+
+CODE QUALITY:
+-------------
+npm run lint
+  - Check code for issues
+
+npm run test
+  - Run all tests once
+
+npm run test:watch
+  - Run tests in watch mode (auto-rerun on changes)
+
+SUPABASE CLI COMMANDS:
+----------------------
+(if using Supabase CLI for local development)
+
+supabase init
+  - Initialize Supabase project
+
+supabase db reset
+  - Reset local database
+
+supabase db pull
+  - Pull latest schema from remote
+
+supabase db push
+  - Push local migrations to remote
+
+================================================================================
+7. TROUBLESHOOTING COMMON ISSUES
+================================================================================
+
+ISSUE: "Cannot find module '@/...'"
+SOLUTION: Check tsconfig.json has correct path mapping:
+  "paths": { "@/*": ["./src/*"] }
+
+ISSUE: Styles not loading in development
+SOLUTION: Ensure tailwind.config.ts is configured correctly
+  and postcss.config.js includes tailwindcss plugin
+
+ISSUE: Supabase authentication not working
+SOLUTION: 
+  1. Check .env.local has correct VITE_SUPABASE_URL and key
+  2. Verify credentials in Supabase dashboard
+  3. Check browser console for errors
+
+ISSUE: Supabase types not auto-generating
+SOLUTION: 
+  - Run: npx supabase db pull (if using CLI)
+  - Check: src/integrations/supabase/types.ts exists
+
+ISSUE: Port 8080 already in use
+SOLUTION: Change port in vite.config.ts server.port property
+  or kill process using that port
+
+================================================================================
+8. PROJECT STRUCTURE SUMMARY
+================================================================================
+
+ROOT LEVEL FILES:
+-----------------
+- package.json          → Dependencies & scripts
+- vite.config.ts       → Build configuration
+- tsconfig.json        → TypeScript configuration
+- tailwind.config.ts   → Styling configuration
+- postcss.config.js    → CSS post-processing
+- index.html           → HTML entry point
+- ARCHITECTURE.md      → Detailed architecture doc
+
+DIRECTORIES:
+------------
+src/                   → Frontend source code
+├── pages/             → Page components
+├── components/        → Reusable components
+├── contexts/          → React Context
+├── hooks/             → Custom hooks
+├── integrations/      → External services (Supabase, Lovable)
+├── lib/               → Utilities
+└── test/              → Test files
+
+supabase/              → Backend configuration
+├── config.toml        → Supabase config
+└── migrations/        → Database migrations
+
+public/                → Static assets
+dist/                  → Production build output (generated)
+
+================================================================================
+9. QUICK START GUIDE
+================================================================================
+
+1. INSTALL DEPENDENCIES:
+   $ npm install
+
+2. SET UP ENVIRONMENT:
+   Create .env.local with:
+   VITE_SUPABASE_URL=https://[your-project].supabase.co
+   VITE_SUPABASE_PUBLISHABLE_KEY=your_anon_key
+
+3. START DEVELOPMENT:
+   $ npm run dev
+   Visit: http://localhost:8080
+
+4. BUILD FOR PRODUCTION:
+   $ npm run build
+
+5. DEPLOY:
+   Push dist/ folder to your hosting service
+
+================================================================================
+ADDITIONAL RESOURCES
+================================================================================
+
+Official Documentation:
+- Vite: https://vitejs.dev
+- React: https://react.dev
+- TypeScript: https://www.typescriptlang.org
+- Supabase: https://supabase.com/docs
+- Tailwind CSS: https://tailwindcss.com
+- Shadcn/UI: https://ui.shadcn.com
+
+Project Resources:
+- ARCHITECTURE.md: Detailed system architecture
+- README.md: Original project readme
+- package.json: Complete dependency list
+
+================================================================================
+END OF CONFIGURATION GUIDE
+================================================================================
+For more information, refer to individual configuration files mentioned above.
